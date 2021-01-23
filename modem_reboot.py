@@ -4,6 +4,9 @@ import time
 import argparse
 import requests
 import json
+#supress Unverified HTTPS Errors
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class SurfboardHNAP:
@@ -32,12 +35,13 @@ class SurfboardHNAP:
 
 
     def _login_request(self, host, username):
-        url = 'http://{}/HNAP1/'.format(host)
+        url = 'https://{}/HNAP1/'.format(host)
         headers = {'SOAPAction' : '"http://purenetworks.com/HNAP1/Login"'}
         payload = '{"Login":{"Action":"request","Username":"' + username + '","LoginPassword":"","Captcha":"","PrivateLogin":"LoginPassword"}}'
 
         try:
-                r = self.s.post(url, headers=headers, data=payload, stream=True)
+                r = self.s.post(url, headers=headers, data=payload, stream=True, verify=False)
+				#the certifcate presented by the modem is not verifable, setting verify=False allows connection to proceed. Without it, connecton fails.
 
                 return r
         except:
@@ -47,7 +51,7 @@ class SurfboardHNAP:
 
 
     def _login_real(self, host, username, cookie_id, privatekey, passkey):
-        url = 'http://{}/HNAP1/'.format(host)
+        url = 'https://{}/HNAP1/'.format(host)
         auth = self.generate_hnap_auth('Login')
         headers = {'HNAP_AUTH' : auth, 'SOAPAction' : '"http://purenetworks.com/HNAP1/Login"'}
         cookies = {'uid' : '{}'.format(cookie_id),
@@ -115,7 +119,7 @@ class SurfboardHNAP:
         cookie_id = self.cookie_id 
         privatekey = self.privatekey
 
-        url = 'http://{}/HNAP1/'.format(host)
+        url = 'https://{}/HNAP1/'.format(host)
         auth = self.generate_hnap_auth('GetMultipleHNAPs')
         headers = {'HNAP_AUTH' : auth, 'SOAPACTION' : '"http://purenetworks.com/HNAP1/GetMultipleHNAPs"'}
 
@@ -154,7 +158,7 @@ class SurfboardHNAP:
         cookie_id = self.cookie_id
         privatekey = self.privatekey
 
-        url = 'http://{}/HNAP1/'.format(host)
+        url = 'https://{}/HNAP1/'.format(host)
         auth = self.generate_hnap_auth('SetStatusSecuritySettings')
         headers = {'HNAP_AUTH' : auth, 'SOAPAction' : '"http://purenetworks.com/HNAP1/SetStatusSecuritySettings"'}
 
